@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:io.github.ashergarland:agent-tool-server-template:local-configuration:v1",
+  "title": "Thin Capability Template local configuration",
+  "description": "This local profile has no capability-specific configuration.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

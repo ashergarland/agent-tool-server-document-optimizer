@@ -1,0 +1,62 @@
+{
+  "contractVersion": 1,
+  "kind": "capability-profile-declaration",
+  "capability": {
+    "id": "io.github.ashergarland/agent-tool-server-template",
+    "displayName": "Thin Capability Template",
+    "repository": "https://github.com/ashergarland/agent-tool-server-template"
+  },
+  "profiles": [
+    {
+      "id": "local-package",
+      "description": "Read-only local execution from the published package over stdio.",
+      "dimensions": {
+        "execution": "local",
+        "delivery": "package",
+        "access": "local-process",
+        "workload": "none",
+        "provider": "none",
+        "mutation": "read-only"
+      },
+      "delivery": {
+        "supportedForms": ["package"],
+        "publication": {
+          "kind": "package",
+          "identifier": "agent-tool-server-template"
+        },
+        "entrypoint": {
+          "reference": "dist/stdio.js",
+          "interface": "stdio"
+        },
+        "mechanics": [
+          {
+            "id": "local-stdio",
+            "reference": "README.md#run-the-capability"
+          }
+        ],
+        "provenance": {
+          "method": "package-metadata",
+          "reference": "package.json#repository"
+        }
+      },
+      "configuration": {
+        "schema": {
+          "id": "urn:io.github.ashergarland:agent-tool-server-template:local-configuration:v1",
+          "capabilityId": "io.github.ashergarland/agent-tool-server-template",
+          "path": "schemas/local-configuration.schema.json"
+        },
+        "bounded": true
+      },
+      "requiredSecrets": [],
+      "providerPrerequisites": [],
+      "identity": {
+        "trustBoundary": "The invoking local user and that user's operating-system permissions.",
+        "rbac": []
+      },
+      "extensionSchemas": [],
+      "verification": {
+        "surfaces": ["version", "behavior", "provenance"]
+      }
+    }
+  ]
+}

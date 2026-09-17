@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+openapi.json
+.env
+*.log
+*.tgz

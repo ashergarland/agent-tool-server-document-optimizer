@@ -1,0 +1,29 @@
+{
+  "$comment": "Capability-owned routing cases. A null expectedTool means no capability tool should run.",
+  "cases": [
+    {
+      "id": "count-text",
+      "request": "How many words and lines are in this supplied paragraph?",
+      "expectedTool": "inspect_text",
+      "reason": "The request asks for metrics over text supplied directly."
+    },
+    {
+      "id": "measure-unicode",
+      "request": "Give me the byte and character counts for this Unicode text.",
+      "expectedTool": "inspect_text",
+      "reason": "The tool distinguishes encoded bytes from characters."
+    },
+    {
+      "id": "out-of-scope-summary",
+      "request": "Summarize this report and identify its main argument.",
+      "expectedTool": null,
+      "reason": "The capability measures shape and does not interpret meaning."
+    },
+    {
+      "id": "out-of-scope-file",
+      "request": "Read C:\\notes\\report.txt and count its words.",
+      "expectedTool": null,
+      "reason": "The capability accepts supplied text and has no filesystem access."
+    }
+  ]
+}

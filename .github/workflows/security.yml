@@ -1,0 +1,23 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '19 4 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+  packages: read
+
+jobs:
+  # Agent Tool Platform workflow pin:
+  # 98ec8162fb11d5c04aee9e6f7b3625a472a0180d
+  capability-security:
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+    uses: ashergarland/agent-tool-platform/.github/workflows/capability-security.yml@98ec8162fb11d5c04aee9e6f7b3625a472a0180d
