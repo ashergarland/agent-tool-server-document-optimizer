@@ -2,19 +2,19 @@
   "contractVersion": 1,
   "kind": "capability-profile-declaration",
   "capability": {
-    "id": "io.github.ashergarland/agent-tool-server-template",
-    "displayName": "Thin Capability Template",
-    "repository": "https://github.com/ashergarland/agent-tool-server-template"
+    "id": "io.github.ashergarland/agent-tool-server-document-optimizer",
+    "displayName": "Document Optimizer",
+    "repository": "https://github.com/ashergarland/agent-tool-server-document-optimizer"
   },
   "profiles": [
     {
-      "id": "local-package",
-      "description": "Read-only local execution from the published package over stdio.",
+      "id": "local-filesystem-package",
+      "description": "Read-only local PDF and DOCX optimization beneath one configured document root.",
       "dimensions": {
         "execution": "local",
         "delivery": "package",
         "access": "local-process",
-        "workload": "none",
+        "workload": "filesystem",
         "provider": "none",
         "mutation": "read-only"
       },
@@ -22,7 +22,7 @@
         "supportedForms": ["package"],
         "publication": {
           "kind": "package",
-          "identifier": "agent-tool-server-template"
+          "identifier": "agent-tool-server-document-optimizer"
         },
         "entrypoint": {
           "reference": "dist/stdio.js",
@@ -41,8 +41,8 @@
       },
       "configuration": {
         "schema": {
-          "id": "urn:io.github.ashergarland:agent-tool-server-template:local-configuration:v1",
-          "capabilityId": "io.github.ashergarland/agent-tool-server-template",
+          "id": "urn:io.github.ashergarland:agent-tool-server-document-optimizer:local-configuration:v1",
+          "capabilityId": "io.github.ashergarland/agent-tool-server-document-optimizer",
           "path": "schemas/local-configuration.schema.json"
         },
         "bounded": true
@@ -53,9 +53,27 @@
         "trustBoundary": "The invoking local user and that user's operating-system permissions.",
         "rbac": []
       },
+      "workload": {
+        "interface": {
+          "kind": "filesystem",
+          "reference": "README.md#filesystem-and-security-boundary"
+        },
+        "authorization": {
+          "scope": "Read-only access beneath DOCUMENT_OPTIMIZER_ROOT, constrained by the invoking user's operating-system permissions."
+        },
+        "lifecycle": {
+          "mode": "session",
+          "freshness": "Each optimization opens and hashes the current source; representations are keyed by source path, content SHA-256, pipeline version, and capability version.",
+          "cleanup": "Source files are never modified; Platform removes the private process-lifetime scratch package cache during shutdown."
+        },
+        "notReady": {
+          "whenAbsent": "not-ready",
+          "reason": "The capability is not ready when DOCUMENT_OPTIMIZER_ROOT is absent or unusable."
+        }
+      },
       "extensionSchemas": [],
       "verification": {
-        "surfaces": ["version", "behavior", "provenance"]
+        "surfaces": ["readiness", "version", "behavior", "provenance"]
       }
     }
   ]

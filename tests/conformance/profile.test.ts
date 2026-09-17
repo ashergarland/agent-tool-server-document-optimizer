@@ -69,21 +69,21 @@ describe('local capability profile truthfulness', () => {
     });
   });
 
-  it('declares all six local, read-only dimensions', async () => {
+  it('declares all six local filesystem, read-only dimensions', async () => {
     const declaration = (await load('../../capability-profiles.json')) as Declaration;
     const profile = declaration.profiles[0];
-    expect(profile.id).toBe('local-package');
+    expect(profile.id).toBe('local-filesystem-package');
     expect(profile.dimensions).toEqual({
       execution: 'local',
       delivery: 'package',
       access: 'local-process',
-      workload: 'none',
+      workload: 'filesystem',
       provider: 'none',
       mutation: 'read-only',
     });
     expect(profile.requiredSecrets).toEqual([]);
     expect(profile.providerPrerequisites).toEqual([]);
-    expect(profile).not.toHaveProperty('workload');
+    expect(profile).toHaveProperty('workload');
     expect(profile).not.toHaveProperty('mutation');
     expect(capability.tools.every((tool) => tool.kind === 'read')).toBe(true);
   });

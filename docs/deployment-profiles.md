@@ -4,21 +4,23 @@ The canonical public declaration is [`../capability-profiles.json`](../capabilit
 It uses Agent Tool Platform deployment contract v1 at revision
 `98ec8162fb11d5c04aee9e6f7b3625a472a0180d`.
 
-## Local default
+## Local filesystem package
 
-The template declares only a `local-package` profile:
+Document Optimizer declares only a `local-filesystem-package` profile:
 
-| Dimension | Value           | Consequence                                       |
-| --------- | --------------- | ------------------------------------------------- |
-| execution | `local`         | The invoking machine runs the process.            |
-| delivery  | `package`       | npm supplies the built artifact.                  |
-| access    | `local-process` | The caller owns the stdio pipe.                   |
-| workload  | `none`          | No file, mount, upload, object, or provider data. |
-| provider  | `none`          | No external provider prerequisite.                |
-| mutation  | `read-only`     | The tool changes no state.                        |
+| Dimension | Value           | Consequence                                                               |
+| --------- | --------------- | ------------------------------------------------------------------------- |
+| execution | `local`         | The invoking machine parses documents.                                    |
+| delivery  | `package`       | npm supplies the built artifact.                                          |
+| access    | `local-process` | The caller owns the stdio pipe.                                           |
+| workload  | `filesystem`    | Inputs are confined beneath `DOCUMENT_OPTIMIZER_ROOT`.                    |
+| provider  | `none`          | No external provider prerequisite exists.                                 |
+| mutation  | `read-only`     | Source/user state is unchanged; cache writes are private ephemeral state. |
 
-This profile needs no cloud infrastructure, HTTP listener, container, external secret, provider
-configuration, or operator deployment instance.
+`optimize_document` writes only a lifecycle-owned scratch representation that is removed at
+shutdown and is not a durable or user-visible mutation. The tool therefore remains a Platform
+`read` tool and the profile remains `read-only`. The profile needs no cloud infrastructure, HTTP
+listener, container, external secret, provider configuration, or operator deployment instance.
 
 ## Add hosted or hybrid support only when real
 

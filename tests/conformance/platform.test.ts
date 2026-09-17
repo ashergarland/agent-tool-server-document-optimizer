@@ -2,8 +2,8 @@ import { readFile } from 'node:fs/promises';
 import {
   createAgentToolApplication,
   type AgentToolApplication,
-  type PlatformConfig,
 } from '@agent-tool-platform/runtime';
+import { RootBoundary } from '@agent-tool-platform/runtime/fs';
 import { createSilentLogger } from '@agent-tool-platform/runtime/logging';
 import { createToolRegistry } from '@agent-tool-platform/runtime/tools';
 import {
@@ -15,23 +15,25 @@ import {
   runMcpConformance,
   runMetadataConformance,
   runOpenApiConformance,
+  runRootBoundaryConformance,
+  runScratchWorkspaceConformance,
   runRegistryConformance,
   runRoutingConformance,
   runTransportParity,
 } from '@agent-tool-platform/testkit';
 import { afterEach, describe, expect, it } from 'vitest';
 import { capability } from '../../src/capability.js';
-import { TextInspector, type CapabilityServices } from '../../src/domain/text-inspector.js';
+import type { DocumentOptimizerConfig } from '../../src/config.js';
 import { capabilityManifest } from '../../src/manifest.js';
+import type { CapabilityServices } from '../../src/services.js';
 import { capabilityTools } from '../../src/tools/definitions.js';
 import { capabilityInstructions } from '../../src/tools/guidance.js';
+import { fixturesRoot } from '../helpers/application.js';
 
-type TestApplication = AgentToolApplication<PlatformConfig, CapabilityServices>;
+type TestApplication = AgentToolApplication<DocumentOptimizerConfig, CapabilityServices>;
 
 const apiKey = generateTestApiKey();
 const applications: TestApplication[] = [];
-const readSample = { name: 'inspect_text', input: { text: 'one two' } } as const;
-
 const createApplication = async (start = true): Promise<TestApplication> => {
   const application = await createAgentToolApplication(capability, {
     logger: createSilentLogger(),
@@ -39,6 +41,7 @@ const createApplication = async (start = true): Promise<TestApplication> => {
       NODE_ENV: 'test',
       AUTH_MODE: 'api-key',
       API_KEYS: apiKey,
+      DOCUMENT_OPTIMIZER_ROOT: fixturesRoot,
     },
     readinessCacheMs: 0,
   });
@@ -53,11 +56,15 @@ afterEach(async () => {
 
 describe('Platform conformance', () => {
   it('satisfies registry and routing contracts', async () => {
+    const application = await createApplication(false);
     const registry = createToolRegistry(capabilityTools);
     const registryResult = await runRegistryConformance({
       registry,
-      services: { text: new TextInspector() },
-      invalidInputSample: { name: 'inspect_text', input: { text: 42 } },
+      services: application.services,
+      invalidInputSample: {
+        name: 'optimize_document',
+        input: { sourcePath: 42 },
+      },
     });
     const routingResult = runRoutingConformance({
       registry,
@@ -81,6 +88,14 @@ describe('Platform conformance', () => {
 
   it('satisfies HTTP, MCP, OpenAPI, and transport parity contracts', async () => {
     const application = await createApplication();
+    const optimized = await application.services.optimizer.optimize(
+      'text.pdf',
+      new AbortController().signal,
+    );
+    const readSample = {
+      name: 'inspect_document',
+      input: { documentId: optimized.manifest.documentId },
+    } as const;
     expect(
       (
         await runHttpConformance({
@@ -124,6 +139,31 @@ describe('Platform conformance', () => {
       (
         await runLifecycleConformance({
           createApplication: () => createApplication(false),
+        })
+      ).failures,
+    ).toEqual([]);
+  });
+
+  it('satisfies Platform scratch and root-boundary contracts', async () => {
+    expect(
+      (
+        await runScratchWorkspaceConformance({
+          createApplication: async () => {
+            const application = await createApplication(false);
+            return { application, workspace: application.services.scratch };
+          },
+        })
+      ).failures,
+    ).toEqual([]);
+    expect(
+      (
+        await runRootBoundaryConformance({
+          createBoundary: (root) =>
+            new RootBoundary({
+              root,
+              requireRegularFile: true,
+              maxFileBytes: 25 * 1024 * 1024,
+            }),
         })
       ).failures,
     ).toEqual([]);
