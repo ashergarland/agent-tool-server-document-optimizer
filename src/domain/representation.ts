@@ -87,9 +87,12 @@ const tableMarkdown = (tableIdValue: string, table: ParsedTable): string => {
   return `**Table ${title}**\n\n${markdownTable(table.headers, table.rows)}`;
 };
 
+const escapeMarkdownLabel = (value: string): string =>
+  value.replace(/\\/gu, '\\\\').replace(/\[/gu, '\\[').replace(/\]/gu, '\\]');
+
 const figureMarkdown = (figureIdValue: string, figure: ParsedFigure): string => {
   const label = figure.semanticDescription ?? figure.caption ?? `Extracted figure ${figureIdValue}`;
-  return `![${label.replace(/\]/gu, '\\]')}](figure:${figureIdValue})`;
+  return `![${escapeMarkdownLabel(label)}](figure:${figureIdValue})`;
 };
 
 const representativeText = (sections: readonly SectionRecord[]): string =>
