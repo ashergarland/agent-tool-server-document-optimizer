@@ -4,6 +4,7 @@ import { access, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/p
 import { tmpdir } from 'node:os';
 import { isAbsolute, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url));
 const npmCli = process.env['npm_execpath'];
@@ -35,7 +36,7 @@ const runNpm = (args, options = {}) => {
 };
 
 class McpClient {
-  constructor(entrypoint, cwd) {
+  constructor(entrypoint, cwd, env = {}) {
     this.buffer = '';
     this.nextId = 1;
     this.pending = new Map();
@@ -43,7 +44,7 @@ class McpClient {
     this.stderr = '';
     this.child = spawn(process.execPath, [entrypoint], {
       cwd,
-      env: { ...process.env },
+      env: { ...process.env, ...env },
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
@@ -189,6 +190,20 @@ const main = async () => {
         2,
       )}\n`,
     );
+    const smokePdf = await PDFDocument.create();
+    smokePdf.setTitle('Packed capability smoke document');
+    smokePdf.setCreationDate(new Date('2026-09-17T00:00:00.000Z'));
+    smokePdf.setModificationDate(new Date('2026-09-17T00:00:00.000Z'));
+    const font = await smokePdf.embedFont(StandardFonts.Helvetica);
+    const page = smokePdf.addPage([400, 400]);
+    page.drawText('Package Smoke', { x: 40, y: 340, size: 20, font });
+    page.drawText('The packed Document Optimizer parsed this PDF outside its source tree.', {
+      x: 40,
+      y: 300,
+      size: 10,
+      font,
+    });
+    await writeFile(join(consumer, 'smoke.pdf'), await smokePdf.save({ useObjectStreams: false }));
     runNpm(
       ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball],
       { cwd: consumer },
@@ -205,11 +220,12 @@ const main = async () => {
 
     await writeFile(
       join(consumer, 'consumer.mjs'),
-      `import { capability, capabilityManifest, TextInspector } from ${JSON.stringify(
+      `import { capability, capabilityManifest, documentPackageSchemaVersion } from ${JSON.stringify(
         packageName,
       )};\n` +
         `if (capability.manifest !== capabilityManifest) throw new Error('exports do not compose');\n` +
-        `if (new TextInspector().inspect('one two').words !== 2) throw new Error('library export failed');\n`,
+        `if (documentPackageSchemaVersion !== '1.0') throw new Error('model export failed');\n` +
+        `if (capability.tools.length !== 6) throw new Error('tool catalogue export failed');\n`,
     );
     runNode(['consumer.mjs'], { cwd: consumer });
 
@@ -226,7 +242,9 @@ const main = async () => {
       assert(((await stat(installedBin)).mode & 0o111) !== 0, 'Installed bin is not executable');
     }
 
-    client = new McpClient(installedEntry, consumer);
+    client = new McpClient(installedEntry, consumer, {
+      DOCUMENT_OPTIMIZER_ROOT: consumer,
+    });
     const initialized = await client.initialize();
     assert(initialized.result?.serverInfo, 'Packed entrypoint returned no MCP server identity');
     assert(
@@ -239,17 +257,61 @@ const main = async () => {
     const listed = await client.request('tools/list');
     const names = (listed.result?.tools ?? []).map((tool) => tool.name);
     assert(
-      JSON.stringify(names) === JSON.stringify(['inspect_text']),
+      JSON.stringify(names) ===
+        JSON.stringify([
+          'optimize_document',
+          'inspect_document',
+          'get_document_outline',
+          'get_document_section',
+          'get_document_table',
+          'get_document_figure',
+        ]),
       `Packed entrypoint exposed unexpected tools: ${names.join(', ')}`,
     );
 
     const invocation = await client.request('tools/call', {
-      name: 'inspect_text',
-      arguments: { text: 'one two\nthree' },
+      name: 'optimize_document',
+      arguments: { sourcePath: 'smoke.pdf' },
     });
-    assert(invocation.result?.isError !== true, 'inspect_text failed from the packed entrypoint');
+    assert(
+      invocation.result?.isError !== true,
+      `optimize_document failed from the packed entrypoint: ${JSON.stringify(invocation.result)}`,
+    );
     const result = invocation.result?.structuredContent;
-    assert(result?.words === 3 && result?.lines === 2, 'inspect_text returned the wrong result');
+    const documentId = result?.manifest?.documentId;
+    assert(
+      typeof documentId === 'string' &&
+        result.manifest.source?.format === 'pdf' &&
+        result.manifest.metrics?.pageCount === 1,
+      'optimize_document returned the wrong manifest',
+    );
+
+    const inspection = await client.request('tools/call', {
+      name: 'inspect_document',
+      arguments: { documentId },
+    });
+    assert(
+      inspection.result?.structuredContent?.summary?.text?.includes(
+        'Packed capability smoke document',
+      ),
+      'inspect_document returned no packed-source summary',
+    );
+    const outline = await client.request('tools/call', {
+      name: 'get_document_outline',
+      arguments: { documentId },
+    });
+    const sectionId = outline.result?.structuredContent?.entries?.[0]?.sectionId;
+    assert(typeof sectionId === 'string', 'get_document_outline returned no section');
+    const section = await client.request('tools/call', {
+      name: 'get_document_section',
+      arguments: { documentId, sectionId },
+    });
+    assert(
+      section.result?.structuredContent?.content?.includes(
+        'packed Document Optimizer parsed this PDF',
+      ),
+      'get_document_section returned no extracted PDF text',
+    );
 
     const exit = await client.shutdown();
     assert(exit.code === 0, `Packed entrypoint exited with code ${String(exit.code)}`);

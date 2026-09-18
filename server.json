@@ -1,16 +1,16 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.ashergarland/agent-tool-server-template",
-  "description": "Read-only local text metrics demonstrating the thin Agent Tool Platform capability shape.",
+  "name": "io.github.ashergarland/agent-tool-server-document-optimizer",
+  "description": "Deterministic progressive-fidelity PDF and DOCX optimization with provenance.",
   "repository": {
-    "url": "https://github.com/ashergarland/agent-tool-server-template",
+    "url": "https://github.com/ashergarland/agent-tool-server-document-optimizer",
     "source": "github"
   },
   "version": "0.0.0-development",
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "agent-tool-server-template",
+      "identifier": "agent-tool-server-document-optimizer",
       "version": "0.0.0-development",
       "transport": {
         "type": "stdio"

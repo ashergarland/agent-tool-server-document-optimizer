@@ -1,11 +1,11 @@
 {
-  "name": "agent-tool-server-template",
+  "name": "agent-tool-server-document-optimizer",
   "version": "0.0.0-development",
-  "description": "Thin local-first capability template for Agent Tool Platform.",
+  "description": "Deterministic, progressive-fidelity PDF and DOCX optimization for agents.",
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.13.0"
   },
   "main": "./dist/public.js",
   "types": "./dist/public.d.ts",
@@ -16,7 +16,7 @@
     }
   },
   "bin": {
-    "agent-tool-capability-template": "dist/stdio.js"
+    "agent-tool-document-optimizer": "dist/stdio.js"
   },
   "files": [
     "dist"
@@ -42,37 +42,48 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "fixtures:generate": "node scripts/generate-document-fixtures.mjs"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ashergarland/agent-tool-server-template.git"
+    "url": "git+https://github.com/ashergarland/agent-tool-server-document-optimizer.git"
   },
-  "homepage": "https://github.com/ashergarland/agent-tool-server-template#readme",
+  "homepage": "https://github.com/ashergarland/agent-tool-server-document-optimizer#readme",
   "bugs": {
-    "url": "https://github.com/ashergarland/agent-tool-server-template/issues"
+    "url": "https://github.com/ashergarland/agent-tool-server-document-optimizer/issues"
   },
   "keywords": [
     "mcp",
     "agent-tools",
     "capability",
-    "template"
+    "pdf",
+    "docx",
+    "document-processing",
+    "context-optimization"
   ],
   "dependencies": {
-    "@agent-tool-platform/runtime": "0.1.2",
+    "@agent-tool-platform/runtime": "0.1.3",
+    "pdfjs-dist": "6.3.289",
+    "saxes": "6.0.0",
+    "yauzl": "3.4.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@agent-tool-platform/testkit": "0.1.2",
+    "@agent-tool-platform/testkit": "0.1.3",
     "@types/node": "22.20.1",
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1",
     "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.5",
     "eslint-config-prettier": "10.1.8",
+    "pdf-lib": "1.17.1",
     "prettier": "3.9.6",
     "tsx": "4.23.11",
     "typescript": "5.9.3",
     "typescript-eslint": "8.66.0",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "yazl": "3.3.1"
   },
   "allowScripts": {
     "esbuild@0.28.2": true

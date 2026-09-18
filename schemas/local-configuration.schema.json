@@ -1,9 +1,81 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:io.github.ashergarland:agent-tool-server-template:local-configuration:v1",
-  "title": "Thin Capability Template local configuration",
-  "description": "This local profile has no capability-specific configuration.",
+  "$id": "urn:io.github.ashergarland:agent-tool-server-document-optimizer:local-configuration:v1",
+  "title": "Document Optimizer local configuration",
+  "description": "Bounded local document root, parser resource limits, result limits, and process-lifetime cache limits.",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "DOCUMENT_OPTIMIZER_ROOT": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Directory that confines every model-selected PDF or DOCX source path."
+    },
+    "DOCUMENT_OPTIMIZER_MAX_SOURCE_BYTES": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 104857600,
+      "default": 26214400
+    },
+    "DOCUMENT_OPTIMIZER_MAX_PDF_PAGES": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2000,
+      "default": 500
+    },
+    "DOCUMENT_OPTIMIZER_MAX_ARCHIVE_ENTRIES": {
+      "type": "integer",
+      "minimum": 8,
+      "maximum": 10000,
+      "default": 2048
+    },
+    "DOCUMENT_OPTIMIZER_MAX_ARCHIVE_BYTES": {
+      "type": "integer",
+      "minimum": 1048576,
+      "maximum": 536870912,
+      "default": 104857600
+    },
+    "DOCUMENT_OPTIMIZER_MAX_XML_BYTES": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 33554432,
+      "default": 8388608
+    },
+    "DOCUMENT_OPTIMIZER_MAX_FIGURE_BYTES": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 16777216,
+      "default": 4194304
+    },
+    "DOCUMENT_OPTIMIZER_MAX_EXTRACTED_CHARACTERS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 10000000,
+      "default": 2000000
+    },
+    "DOCUMENT_OPTIMIZER_MAX_RESULT_CHARACTERS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 1000000,
+      "default": 128000
+    },
+    "DOCUMENT_OPTIMIZER_PROCESSING_TIMEOUT_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 300000,
+      "default": 30000
+    },
+    "DOCUMENT_OPTIMIZER_MAX_CACHED_DOCUMENTS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 128,
+      "default": 16
+    },
+    "DOCUMENT_OPTIMIZER_QUEUE_LIMIT": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 128,
+      "default": 8
+    }
+  },
   "additionalProperties": false
 }

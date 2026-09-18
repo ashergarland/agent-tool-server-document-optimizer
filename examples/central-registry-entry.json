@@ -1,6 +1,6 @@
 {
-  "id": "agent-tool-server-template",
-  "repository": "https://github.com/ashergarland/agent-tool-server-template",
+  "id": "agent-tool-server-document-optimizer",
+  "repository": "https://github.com/ashergarland/agent-tool-server-document-optimizer",
   "serverMetadata": "server.json",
-  "categories": ["developer-tools", "utilities"]
+  "categories": ["document-processing", "context-optimization", "developer-tools"]
 }

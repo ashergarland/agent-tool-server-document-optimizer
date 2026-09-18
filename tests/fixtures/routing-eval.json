@@ -1,29 +1,59 @@
 {
-  "$comment": "Capability-owned routing cases. A null expectedTool means no capability tool should run.",
+  "$comment": "Capability-owned routing cases. A null expectedTool means another capability or raw source access is preferable.",
   "cases": [
     {
-      "id": "count-text",
-      "request": "How many words and lines are in this supplied paragraph?",
-      "expectedTool": "inspect_text",
-      "reason": "The request asks for metrics over text supplied directly."
+      "id": "optimize-large-pdf",
+      "request": "This 140-page PDF is expensive to reread. Create a reusable structured representation with provenance.",
+      "expectedTool": "optimize_document",
+      "reason": "A bounded PDF should be preprocessed once for progressive access."
     },
     {
-      "id": "measure-unicode",
-      "request": "Give me the byte and character counts for this Unicode text.",
-      "expectedTool": "inspect_text",
-      "reason": "The tool distinguishes encoded bytes from characters."
+      "id": "inspect-overview",
+      "request": "Give me the cheapest overview and counts for the document I just optimized.",
+      "expectedTool": "inspect_document",
+      "reason": "The manifest includes the deterministic summary, status, and structural counts."
     },
     {
-      "id": "out-of-scope-summary",
-      "request": "Summarize this report and identify its main argument.",
+      "id": "choose-section",
+      "request": "Show me the heading hierarchy and which sections contain tables.",
+      "expectedTool": "get_document_outline",
+      "reason": "The paginated outline is the lowest-cost way to select detail."
+    },
+    {
+      "id": "retrieve-section",
+      "request": "Read only section-004-runtime-contract from this optimized document.",
+      "expectedTool": "get_document_section",
+      "reason": "The caller already selected one section and should not receive the full document."
+    },
+    {
+      "id": "retrieve-table",
+      "request": "Return table-002 as structured rows so I can compare listener settings.",
+      "expectedTool": "get_document_table",
+      "reason": "Structured cells are preferable to flattened text or an image."
+    },
+    {
+      "id": "figure-metadata",
+      "request": "What caption, dimensions, and source page are recorded for figure-003?",
+      "expectedTool": "get_document_figure",
+      "reason": "Figure metadata should be inspected before requesting raster bytes."
+    },
+    {
+      "id": "out-of-scope-corpus",
+      "request": "Search every document in the company corpus for this deployment setting.",
       "expectedTool": null,
-      "reason": "The capability measures shape and does not interpret meaning."
+      "reason": "Corpus retrieval belongs to Doc RAG, not Document Optimizer."
     },
     {
-      "id": "out-of-scope-file",
-      "request": "Read C:\\notes\\report.txt and count its words.",
+      "id": "out-of-scope-vision",
+      "request": "Interpret the arrows and service relationships in this architecture diagram.",
       "expectedTool": null,
-      "reason": "The capability accepts supplied text and has no filesystem access."
+      "reason": "Semantic image interpretation belongs to Vision."
+    },
+    {
+      "id": "out-of-scope-exact-page",
+      "request": "Render the original PDF page exactly as pixels for legal comparison.",
+      "expectedTool": null,
+      "reason": "Exact page rendering and binary fidelity require a raw/source rendering tool."
     }
   ]
 }
